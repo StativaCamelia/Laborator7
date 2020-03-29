@@ -3,6 +3,7 @@ package PositionalGame;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,10 +13,12 @@ public class Player implements Runnable{
     String name = new String();
     List<Token> tokenList = new ArrayList<>();
     Game currentGame;
+    int score = 0;
 
     Player(String name, Game game){
         this.name = name;
         this.currentGame = game;
+        game.addPlayer(this);
     }
 
     public void addToken(Token token){
@@ -31,31 +34,49 @@ public class Player implements Runnable{
         return name.equals(other.name);
     }
 
-    public boolean verifyProgression(){
-        Collections.sort(this.tokenList, (Object o1, Object o2) ->{
-            Token p1 = (Token) o1;
-            Token p2 = (Token) o2;
-            if (p1.getTokenValue() < p2.getTokenValue()) return -1;
-            if (p1.getTokenValue() > p2.getTokenValue()) return 1;
-            return 0;
-        });
-
-        int step = Math.abs((tokenList.get(0).getTokenValue() -tokenList.get(1).getTokenValue()));
-        for(int i=1; i< tokenList.size(); i++){
-            if(Math.abs(tokenList.get(i).getTokenValue() -tokenList.get(i+1).getTokenValue()) != step){
-                return false;
+    private int lenghtOfLongestProgression()
+    {
+        int[][] matrix = new int[tokenList.size()][tokenList.size()];
+        int step = 2;
+        if (tokenList.size() <= 2)
+            return tokenList.size();
+        for (int i = 0; i < tokenList.size(); i++)
+            matrix[i][tokenList.size()-1] = 2;
+        for (int j=tokenList.size()-2; j>=1; j--)
+        {
+            int i = j-1, k = j+1;
+            while (i >= 0 && k <= tokenList.size()-1)
+            {
+                if (tokenList.get(i).getTokenValue() + tokenList.get(k).getTokenValue() < 2*tokenList.get(j).getTokenValue())
+                    k++;
+                else if (tokenList.get(i).getTokenValue() + tokenList.get(k).getTokenValue() > 2*tokenList.get(j).getTokenValue())
+                {   matrix[i][j] = 2;
+                        i--;
+                }
+                else
+                {
+                    matrix[i][j] = matrix[j][k] + 1;
+                    if(step < matrix[i][j])
+                        step = matrix[i][j];
+                    i--;
+                    k++;
+                }
+            }
+            while (i >= 0)
+            {
+                matrix[i][j] = 2;
+                i--;
             }
         }
-        return true;
+        return step;
     }
 
     @Override
     public void run() {
         try {
             while(currentGame.isGameContinue()){
-                Thread.sleep(ThreadLocalRandom.current().nextInt(2000, 3000));
+                Thread.sleep(ThreadLocalRandom.current().nextInt(3000, 5000));
                 if(currentGame.gameBoard.getTokenList().isEmpty()){
-
                     currentGame.setGameContinue(false);
                     return;
                 }
@@ -64,12 +85,14 @@ public class Player implements Runnable{
                     Token extractedToken = currentGame.gameBoard.tokenList.get(randomPosition);
                     System.out.println(extractedToken);
                     currentGame.extractFromBoard(extractedToken);
+                    System.out.println("Jucatorul:" + this.name + " a extras token-ul:" + extractedToken);
                     tokenList.add(extractedToken);
-                    
-                    if(tokenList.size() == currentGame.getProgressionSize()) {
-                        if (verifyProgression()) {
-                            System.out.println("Jucatorul" + name + "este castigator");
+
+                    if(tokenList.size() >= currentGame.getProgressionSize()) {
+                        if (lenghtOfLongestProgression() >= currentGame.getProgressionSize()) {
+                            System.out.println("Jucatorul" + name + "este castigator" );
                             currentGame.setGameContinue(false);
+                            score = this.currentGame.gameBoardSize;
                             return;
                         }
                     }
@@ -79,9 +102,23 @@ public class Player implements Runnable{
         catch(InterruptedException e){
             e.printStackTrace();
         }
+
         finally {
+            score = lenghtOfLongestProgression();
             System.out.println(tokenList);
         }
+    }
+
+    public void setTokenList(List<Token> tokenList) {
+        this.tokenList = tokenList;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     public String getName() {

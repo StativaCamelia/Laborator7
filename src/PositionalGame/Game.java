@@ -31,7 +31,6 @@ public class Game {
     }
 
 
-
     public boolean isGameContinue() {
         return gameContinue;
     }
@@ -39,9 +38,6 @@ public class Game {
     public void initGame(){
         gameBoard = new Board(gameBoardSize, tokenLimit);
         gameBoard.initBoard();
-        for(Token tok : gameBoard.getTokenList()){
-            System.out.print(tok.tokenValue + " ");
-        }
     }
 
     public void addPlayer(Player player){
@@ -56,11 +52,20 @@ public class Game {
         while (available) {
             try {
                 wait();
-                System.out.println("Here");
             } catch (InterruptedException e) { e.printStackTrace(); }
         }
         this.available = false; notifyAll();
         this.gameBoard.getTokenList().remove(extractedToken);
+    }
+
+    public void setGameContinue(boolean gameContinue) {
+        this.gameContinue = gameContinue;
+    }
+
+    public void getWinners(){
+        for(Player player: playersList){
+            System.out.println(player.getName() + "a obtinut:" + player.getScore());
+        }
     }
 
     public Board getGameBoard() {
@@ -85,10 +90,6 @@ public class Game {
 
     public List<Player> getPlayersList() {
         return playersList;
-    }
-
-    public void setGameContinue(boolean gameContinue) {
-        this.gameContinue = gameContinue;
     }
 
     public int getProgressionSize() {

@@ -2,20 +2,15 @@ package PositionalGame;
 
 import Exceptions.InvalidTokenException;
 
-import java.util.Comparator;
-
 public class Token {
     int tokenValue;
     int tokenLimit;
-
 
     Token(int tokenValue, int tokenLimit){
         if(tokenValue < 1 || tokenValue > tokenLimit) throw new InvalidTokenException(tokenValue);
         else
         this.tokenValue = tokenValue;
     }
-
-
 
     public int getTokenValue() {
         return tokenValue;
@@ -27,6 +22,13 @@ public class Token {
             this.tokenValue = tokenValue;
     }
 
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Token)) {
+            return false;
+        }
+        Token other = (Token) obj;
+        return tokenValue == other.tokenValue;
+    }
     @Override
     public String toString() {
         return String.format("%d",tokenValue);

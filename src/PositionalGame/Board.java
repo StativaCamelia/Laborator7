@@ -32,9 +32,20 @@ public class Board {
     }
 
     public void initBoard(){
-        for (int i = 1; i <=boardSize; i++) {
-            this.tokenList.add(new Token(i,tokenLimit));
+        while(tokenList.size()!= boardSize)
+         {
+             int possibleValue = (int)Math.floor(Math.random()*tokenLimit) + 1;
+             Token possibleToken = new Token(possibleValue, tokenLimit);
+             this.addToken(possibleToken);
         }
+    }
+
+    private void addToken(Token tok){
+        for(Token tokInd: tokenList){
+            if(tokInd.equals(tok))
+                return;
+        }
+        tokenList.add(tok);
     }
 
     @Override
