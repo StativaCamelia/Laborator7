@@ -9,6 +9,7 @@ public class Game {
     int gameBoardSize;
     int tokenLimit;
     int progressionSize;
+
     boolean gameContinue = true;
     boolean available = false;
 
@@ -30,11 +31,17 @@ public class Game {
         this.gameBoardSize = gameBoard.getBoardSize();
     }
 
-
+    /**
+     * Returneaza statusul curent al jocului, daca continua sau daca s-a incheiat
+     * @return
+     */
     public boolean isGameContinue() {
         return gameContinue;
     }
 
+    /**
+     * Initializeaza jocul creend board-ul pe care acesta se va juca
+     */
     public void initGame(){
         gameBoard = new Board(gameBoardSize, tokenLimit);
         gameBoard.initBoard();
@@ -48,20 +55,31 @@ public class Game {
         playersList.add(player);
     }
 
+    /**
+     * Metoda este syncronized pentru a nu permite apelurilor din partea unor user diferiti sa se suprapuna
+     * Daca metoda este available ea va putea fi folosita de un jucator in cadrul jocului, in caz contrar se asteapta daca aceasta devine available
+     * Cat timp un anume thread utilizeaza metoda aceasta este marcata ca nefiind available, la finalul executiei metodei toate thread-urile sunt anuntate
+     * ca metoda este disponibila si poate fi utilizata
+     * @param extractedToken
+     */
     public synchronized void extractFromBoard(Token extractedToken) {
         while (available) {
             try {
                 wait();
             } catch (InterruptedException e) { e.printStackTrace(); }
         }
-        this.available = false; notifyAll();
+        this.available = false;
         this.gameBoard.getTokenList().remove(extractedToken);
+        notifyAll();
     }
 
     public void setGameContinue(boolean gameContinue) {
         this.gameContinue = gameContinue;
     }
 
+    /**
+     * Afiseaza punctajele finale ale jucatorilor
+     */
     public void getWinners(){
         for(Player player: playersList){
             System.out.println(player.getName() + "a obtinut:" + player.getScore());

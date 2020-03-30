@@ -71,6 +71,14 @@ public class Player implements Runnable{
         return step;
     }
 
+    /**
+     * Cat timp jocul este in desfasurarea se verifica daca mai exista tokens care pot fi extrasi, in cazul in care nu mai exista jocul este setat ca fiind
+     * incheiat si metoda se termina. In cazul in care mai exista tokens se alege random una din cei din board si se adauga in pachetul player-ului curent
+     * Daca playeri au extras un numar mai mare sau egal de tokens cu size-ul progresiei aritmetice care conduce la castig incepe sa se verifice daca exista
+     * playeri care au castigat. Daca a fost gasit un castigator jocul este declarat incheiat si metoda se termina.
+     * In final este setat scorul player-ului. Daca a castigat va fi n, in caz contrar se determina cea mai lunga progresia aritmetica de tokens pe care
+     * a reusit sa o formeze acesta
+     */
     @Override
     public void run() {
         try {
@@ -104,8 +112,10 @@ public class Player implements Runnable{
         }
 
         finally {
-            score = lenghtOfLongestProgression();
-            System.out.println(tokenList);
+            if(score != this.currentGame.gameBoardSize) {
+                score = lenghtOfLongestProgression();
+                System.out.println(tokenList);
+            }
         }
     }
 

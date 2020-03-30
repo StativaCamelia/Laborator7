@@ -11,6 +11,11 @@ public class Board {
     int tokenLimit;
     List<Token> tokenList = new ArrayList<>();
 
+    /**
+     *Daca dimensiunea board-ului sau a limitei superioare pentru tokens nu respecte conditiile (n> 1) si (m>1 si m< n) arunc o exceptie
+     * @param boardSize
+     * @param tokenLimit
+     */
     Board(int boardSize, int tokenLimit){
         if(boardSize < 1)
             throw new InvalidBoardSizeException(boardSize);
@@ -31,6 +36,9 @@ public class Board {
         else this.tokenLimit = tokenLimit;
     }
 
+    /**
+     * Initializez Board-ul cu valori random distincte din intervalul (1,m)
+     */
     public void initBoard(){
         while(tokenList.size()!= boardSize)
          {

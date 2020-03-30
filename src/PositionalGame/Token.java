@@ -6,6 +6,11 @@ public class Token {
     int tokenValue;
     int tokenLimit;
 
+    /**
+     * Daca valoarea asociata token-ului este mai mica decat 1 sau mai mare decat m arunca o exceptie
+     * @param tokenValue
+     * @param tokenLimit
+     */
     Token(int tokenValue, int tokenLimit){
         if(tokenValue < 1 || tokenValue > tokenLimit) throw new InvalidTokenException(tokenValue);
         else
