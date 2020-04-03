@@ -9,17 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Player implements Runnable{
+public abstract class Player implements Runnable{
     String name = new String();
     List<Token> tokenList = new ArrayList<>();
     Game currentGame;
     int score = 0;
-
-    Player(String name, Game game){
-        this.name = name;
-        this.currentGame = game;
-        game.addPlayer(this);
-    }
 
     public void addToken(Token token){
         this.tokenList.add(token);
@@ -34,7 +28,7 @@ public class Player implements Runnable{
         return name.equals(other.name);
     }
 
-    private int lenghtOfLongestProgression()
+    public int lenghtOfLongestProgression()
     {
         int[][] matrix = new int[tokenList.size()][tokenList.size()];
         int step = 2;
@@ -80,44 +74,7 @@ public class Player implements Runnable{
      * a reusit sa o formeze acesta
      */
     @Override
-    public void run() {
-        try {
-            while(currentGame.isGameContinue()){
-                Thread.sleep(ThreadLocalRandom.current().nextInt(3000, 5000));
-                if(currentGame.gameBoard.getTokenList().isEmpty()){
-                    currentGame.setGameContinue(false);
-                    return;
-                }
-                else{
-                    int randomPosition = (int)Math.floor(Math.random()*currentGame.getGameBoard().tokenList.size());
-                    Token extractedToken = currentGame.gameBoard.tokenList.get(randomPosition);
-                    System.out.println(extractedToken);
-                    currentGame.extractFromBoard(extractedToken);
-                    System.out.println("Jucatorul:" + this.name + " a extras token-ul:" + extractedToken);
-                    tokenList.add(extractedToken);
-
-                    if(tokenList.size() >= currentGame.getProgressionSize()) {
-                        if (lenghtOfLongestProgression() >= currentGame.getProgressionSize()) {
-                            System.out.println("Jucatorul" + name + "este castigator" );
-                            currentGame.setGameContinue(false);
-                            score = this.currentGame.gameBoardSize;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-        catch(InterruptedException e){
-            e.printStackTrace();
-        }
-
-        finally {
-            if(score != this.currentGame.gameBoardSize) {
-                score = lenghtOfLongestProgression();
-                System.out.println(tokenList);
-            }
-        }
-    }
+    public abstract void run();
 
     public void setTokenList(List<Token> tokenList) {
         this.tokenList = tokenList;

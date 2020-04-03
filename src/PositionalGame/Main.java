@@ -6,20 +6,36 @@ import java.util.stream.IntStream;
 public class Main {
     public static void main(String[] main){
 
-        Game game = new Game(10, 50,3);
-        System.out.println("Introduceti numarul de playeri");
         Scanner scan = new Scanner(System.in);
-        int numberOfPlayers = scan.nextInt() -1 ;
-        scan.close();
-        Player[] arrayOfPlayers = IntStream.rangeClosed(0, numberOfPlayers).mapToObj(i -> new Player("Player" + (i+1), game)).toArray(Player[]::new);
+        Game game = new Game(100, 120,3, scan);
+        System.out.println("Introduceti numarul de playeri");
+
+        int numberOfPlayers = scan.nextInt();
+        Player[] arrayOfPlayers = new Player[numberOfPlayers];
+
+        System.out.println("Introduceti durata de desfasurare a meciului in secunde:");
+        int durata = scan.nextInt();
+        scan.nextLine();
+
+        UserInput input = new UserInput(game, scan);
+
+        for(int i=0; i< numberOfPlayers; i++) {
+            if (Math.random() <= 0.5)
+                arrayOfPlayers[i] = new ManualPlayer("Player" + i, game);
+            else
+                arrayOfPlayers[i] = new RandomPlayer("Player" + i, game);
+        }
 
         game.initGame();
 
-        Thread[] arrayOfThreads = IntStream.rangeClosed(0, numberOfPlayers).mapToObj(i -> new Thread(arrayOfPlayers[i])).toArray(Thread[]::new);
+        Thread[] arrayOfThreads = IntStream.range(0, numberOfPlayers).mapToObj(i -> new Thread(arrayOfPlayers[i])).toArray(Thread[]::new);
 
-       for(Thread thread : arrayOfThreads){
+        Thread dt = new Thread(new DaemonTimer(game, durata), "dt");
+        dt.setDaemon(true);
+        dt.start();
+        for(Thread thread : arrayOfThreads){
            thread.start();
-       }
+        }
 
         try {
             for (Thread thread : arrayOfThreads) {
@@ -31,6 +47,7 @@ public class Main {
         }
 
         game.getWinners();
+        scan.close();
 
     }
 }

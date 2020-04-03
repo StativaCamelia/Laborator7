@@ -2,6 +2,7 @@ package PositionalGame;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Game {
     List<Player> playersList = new ArrayList<>();
@@ -9,15 +10,17 @@ public class Game {
     int gameBoardSize;
     int tokenLimit;
     int progressionSize;
+    Scanner scan;
 
-    boolean gameContinue = true;
+    volatile boolean gameContinue = true;
     boolean available = false;
 
 
-    Game( int gameBoardSize, int tokenLimit, int progressionSize){
+    Game( int gameBoardSize, int tokenLimit, int progressionSize, Scanner scan){
         this.gameBoardSize = gameBoardSize;
         this.tokenLimit = tokenLimit;
         this.progressionSize = progressionSize;
+        this.scan = scan;
     }
 
     Game(List<Player> playersList, int gameBoardSize){
@@ -60,17 +63,35 @@ public class Game {
      * Daca metoda este available ea va putea fi folosita de un jucator in cadrul jocului, in caz contrar se asteapta daca aceasta devine available
      * Cat timp un anume thread utilizeaza metoda aceasta este marcata ca nefiind available, la finalul executiei metodei toate thread-urile sunt anuntate
      * ca metoda este disponibila si poate fi utilizata
-     * @param extractedToken
+     * @param
      */
-    public synchronized void extractFromBoard(Token extractedToken) {
+    public synchronized Token extractFromBoard(int position) {
         while (available) {
             try {
                 wait();
             } catch (InterruptedException e) { e.printStackTrace(); }
         }
         this.available = false;
-        this.gameBoard.getTokenList().remove(extractedToken);
-        notifyAll();
+        if(position != -1) {
+            Token extractedToken = this.gameBoard.tokenList.get(position);
+            this.gameBoard.getTokenList().remove(extractedToken);
+            notifyAll();
+            return extractedToken;
+        }
+        else{
+            while (true) {
+                System.out.println("Introduceti valoarea unui token din lista:" + this.getGameBoard().getTokenList().toString());
+                int tokenValue = scan.nextInt();
+                for (Token tok : this.gameBoard.tokenList) {
+                    if (tokenValue == tok.getTokenValue()) {
+                        Token extractedToken = tok;
+                        this.gameBoard.getTokenList().remove(extractedToken);
+                        return tok;
+                    }
+                }
+                System.out.println("Valoarea introdusa nu corespunde unui token incercati iar:");
+            }
+        }
     }
 
     public void setGameContinue(boolean gameContinue) {
@@ -81,8 +102,23 @@ public class Game {
      * Afiseaza punctajele finale ale jucatorilor
      */
     public void getWinners(){
+        boolean winnerExists = false;
         for(Player player: playersList){
-            System.out.println(player.getName() + "a obtinut:" + player.getScore());
+            if(player.getScore() == gameBoardSize )
+                winnerExists = true;
+        }
+        if(winnerExists){
+            for(Player player: playersList){
+                if(player.getScore() != gameBoardSize)
+                    player.setScore(0);
+                System.out.println("Player-ul:" + player.getName()+ " are:" + player.getScore());
+            }
+        }
+        else{
+            for(Player player: playersList){
+                System.out.println("Player-ul:" + player.getName()+ " are:" + player.getScore());
+            }
+
         }
     }
 
